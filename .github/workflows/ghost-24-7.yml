@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: pip install --no-cache-dir discord.py cryptography
 
+      - name: Write bot file
+        env:
+          BOT_CODE: ${{ secrets.BOT_CODE }}
+        run: printf '%s\n' "$BOT_CODE" > ghost_bot.py
+
       - name: Run Ghost
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
