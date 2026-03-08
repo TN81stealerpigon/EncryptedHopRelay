@@ -2,14 +2,14 @@ name: Ghost 24/7
 
 on:
   schedule:
-    - cron: "0 */6 * * *"          # Every 6 hours (maximizes continuous runtime)
-  workflow_dispatch:               # Manual trigger button in GitHub UI
+    - cron: "0 */6 * * *"           # Every 6 hours — long runs + auto restart
+  workflow_dispatch:                # Allows manual trigger from Actions tab
   push:
     branches: [ main ]
 
 concurrency:
   group: ghost-bot-single-instance
-  cancel-in-progress: false        # Queue next run instead of canceling current
+  cancel-in-progress: false         # Queue next run instead of killing current one
 
 jobs:
   run-ghost:
@@ -35,17 +35,32 @@ jobs:
         run: |
           python3 -c "import os; open('ghost_bot.py', 'w', encoding='utf-8').write(os.environ['BOT_CODE'])"
 
-      - name: Run Ghost Bot
+      - name: Run Ghost Bot with debug
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
-          python ghost_bot.py &
-          BOT_PID=$!
-          sleep 10
-          if ! kill -0 $BOT_PID 2>/dev/null; then
-            echo "Bot failed to start (check logs or token)"
+          echo "=== Debug: Checking environment variables ==="
+          echo "DISCORD_TOKEN length: ${#DISCORD_TOKEN}"
+          if [ -z "$DISCORD_TOKEN" ]; then
+            echo "ERROR: DISCORD_TOKEN is empty or not set!"
+            echo "Check repository secrets → DISCORD_TOKEN must exist and contain a valid token."
             exit 1
           fi
-          echo "Bot running with PID $BOT_PID"
-          trap "echo 'Shutting down...'; kill $BOT_PID 2>/dev/null; wait $BOT_PID 2>/dev/null; echo 'Bot stopped'" EXIT
+          echo "DISCORD_TOKEN appears to be set (length > 0)"
+
+          echo "Starting bot..."
+          python ghost_bot.py &
+          BOT_PID=$!
+
+          sleep 10
+
+          if ! kill -0 $BOT_PID 2>/dev/null; then
+            echo "Bot failed to start (most likely invalid/missing token or syntax error)"
+            echo "Check the lines above for Python errors or token issues."
+            exit 1
+          fi
+
+          echo "Bot appears to be running (PID $BOT_PID)"
+
+          trap "echo 'Shutting down gracefully...'; kill $BOT_PID 2>/dev/null; wait $BOT_PID 2>/dev/null; echo 'Bot stopped'" EXIT
           wait $BOT_PID || true
