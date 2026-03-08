@@ -64,3 +64,19 @@ jobs:
 
           trap "echo 'Shutting down gracefully...'; kill $BOT_PID 2>/dev/null; wait $BOT_PID 2>/dev/null; echo 'Bot stopped'" EXIT
           wait $BOT_PID || true
+
+      - name: Save and commit conversation state (on exit)
+        if: always()  # Runs even if previous step failed/timed out
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Use your GitHub PAT secret for push access
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          
+          if [ -f conversation_state.json ]; then
+            git add conversation_state.json
+            git commit -m "Update conversation state (auto-save at $(date -u +'%Y-%m-%d %H:%M:%S UTC'))" || echo "No changes to commit"
+            git push origin HEAD:main || echo "Push failed (maybe no changes or auth issue)"
+          else
+            echo "No state file to commit"
+          fi
