@@ -7,6 +7,10 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  actions: write
+  contents: write
+
 concurrency:
   group: ghost-bot-single-instance
   cancel-in-progress: true
@@ -25,11 +29,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install --no-cache-dir discord.py cryptography
-
-      - name: Write bot file
-        env:
-          BOT_CODE: ${{ secrets.BOT_CODE }}
-        run: printf '%s\n' "$BOT_CODE" > ghost_bot.py
 
       - name: Run Ghost
         env:
@@ -53,24 +52,22 @@ jobs:
       - name: Save state
         if: always()
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          [ -f conversation_state.json ] || true
           git config --global user.name "ghost-bot"
           git config --global user.email "ghost@bot"
           git add conversation_state.json 2>/dev/null || true
-          git commit -m "state $(date -u +'%Y-%m-%d %H:%M UTC')" || true
+          git diff --cached --quiet || git commit -m "state $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push origin HEAD:main || echo "Push failed"
 
       - name: Clean up old runs
         if: always()
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           CURRENT=${{ github.run_id }}
           echo "Cleaning up old runs..."
-          # cancel + delete any still-running old instances
           gh run list --repo "$REPO" --workflow "Ghost 24/7" \
             --json databaseId,status --limit 50 \
             --jq '.[] | select(.status != "completed") | .databaseId' \
@@ -79,16 +76,14 @@ jobs:
             echo "Cancelling $ID..."
             gh run cancel "$ID" --repo "$REPO" 2>/dev/null || true
             sleep 5
-            echo "Deleting $ID..."
             gh run delete "$ID" --repo "$REPO" 2>/dev/null || true
           done
-          # delete all completed runs except current
           gh run list --repo "$REPO" --workflow "Ghost 24/7" \
             --json databaseId,status --limit 50 \
             --jq '.[] | select(.status == "completed") | .databaseId' \
           | while read ID; do
             [ "$ID" = "$CURRENT" ] && continue
-            echo "Deleting completed $ID..."
+            echo "Deleting $ID..."
             gh run delete "$ID" --repo "$REPO" 2>/dev/null || true
           done
           echo "Cleanup done"
