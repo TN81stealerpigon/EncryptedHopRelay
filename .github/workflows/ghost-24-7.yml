@@ -1,0 +1,51 @@
+name: Ghost 24/7
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"          # Every 6 hours (maximizes continuous runtime)
+  workflow_dispatch:               # Manual trigger button in GitHub UI
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ghost-bot-single-instance
+  cancel-in-progress: false        # Queue next run instead of canceling current
+
+jobs:
+  run-ghost:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install discord.py cryptography
+
+      - name: Write bot code from secret
+        env:
+          BOT_CODE: ${{ secrets.BOT_CODE }}
+        run: |
+          python3 -c "import os; open('ghost_bot.py', 'w', encoding='utf-8').write(os.environ['BOT_CODE'])"
+
+      - name: Run Ghost Bot
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: |
+          python ghost_bot.py &
+          BOT_PID=$!
+          sleep 10
+          if ! kill -0 $BOT_PID 2>/dev/null; then
+            echo "Bot failed to start (check logs or token)"
+            exit 1
+          fi
+          echo "Bot running with PID $BOT_PID"
+          trap "echo 'Shutting down...'; kill $BOT_PID 2>/dev/null; wait $BOT_PID 2>/dev/null; echo 'Bot stopped'" EXIT
+          wait $BOT_PID || true
