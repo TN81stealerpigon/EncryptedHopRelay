@@ -1,0 +1,42 @@
+{
+  "store": [
+    {
+      "index": 0,
+      "author_id": 1280595392110792767,
+      "author_name": "🎩ZetaByteBandit",
+      "blob": "gAAAAABpsJBfFw-jNnACz_CD5CMcOl8QImT6YFgEU5j5IpkR8mco4IbXfjUyufUhFoBVnrpDlS6KbAF4vYoMs5jcVTOcOydPtw==",
+      "display_blob": "gAAAAABpsJBfFw-jNnACz_CD5CMcOl8QImT6YFgEU5j5IpkR8mco4IbXfjUyufUhFrBVnrpDlS6KbAF4vYoMs5jcVTOcOydPtw==",
+      "msg_id": 1481044709865427127
+    },
+    {
+      "index": 1,
+      "author_id": 1280595392110792767,
+      "author_name": "🎩ZetaByteBandit",
+      "blob": "gAAAAABpsJB-OqbQodYNnEJIB6fBizR6nzvIuLiiHcHUd4l09TnGRxh3RFRXJZBFkTUvHyTWF734mroAybKsezSM3VlHGDrpVA==",
+      "display_blob": "gAAAAABpsJB-OqbQodYNnEJIB6fBizH6nzvIuLiiHcHUd4l09TnGRxh3RFRXJZBFkTUvHyTWF734mroAybKsezSM3VlHGDrpVA==",
+      "msg_id": 1481044842644771069
+    },
+    {
+      "index": 2,
+      "author_id": 1479156792629133475,
+      "author_name": "BitRot Syndicate",
+      "blob": "gAAAAABpsJCNiYThFGxZabMzrpFuNhyenJ3TUyrOxJ8VpI7YBhtbjxZftiO8wwrtqmy2Kp2Mfq0ZNImS-4JGLQiRT1TF1gv1Aw==",
+      "display_blob": "gAAAAABpsJCNiYThFGxZabMzrpNuNhyenJ3TUyrOxJ8VpI7YBhtbjxZftiO8wwrtqmy2Kp2Mfq0ZNImS-4JGLQiRT1TF1gv1Aw==",
+      "msg_id": 1481044903546065028
+    },
+    {
+      "index": 3,
+      "author_id": 1280595392110792767,
+      "author_name": "🎩ZetaByteBandit",
+      "blob": "gAAAAABpsJCVaVuQdQysnl_hA6Af1ikvxCtmZN5Hkzn4iKDEv5LHA4BQrYxqVhMpDdosI8500YvhlY-pbxVfupEYl7tu4LOm-g==",
+      "display_blob": "gAAAAABpsJCVaVuQdQysnl_hA_Af1ikvxCtmZN5Hkzn4iKDEv5LHA4BQrYxqVhMpDdosI8500YvhlY-pbxVfupEYl7tu4LOm-g==",
+      "msg_id": 1481044938258120848
+    }
+  ],
+  "bot_store": {
+    "1481044903546065028": {
+      "author_name": "BitRot Syndicate",
+      "content": "Acknowledged."
+    }
+  }
+}
