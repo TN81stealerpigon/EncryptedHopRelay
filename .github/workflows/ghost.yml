@@ -28,7 +28,9 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install --no-cache-dir discord.py cryptography
+        run: |
+          pip install --upgrade pip
+          pip install --no-cache-dir discord.py cryptography>=41.0.0
 
       - name: Write bot file
         env:
@@ -44,11 +46,15 @@ jobs:
           python ghost_bot.py &
           BOT_PID=$!
 
-          sleep 12
-          kill -0 $BOT_PID 2>/dev/null || { echo "Bot failed to start"; exit 1; }
+          sleep 15
+          if ! kill -0 $BOT_PID 2>/dev/null; then
+            echo "Bot failed to start - check logs above"
+            exit 1
+          fi
           echo "Ghost running (PID $BOT_PID)"
 
           trap '
+            echo "Shutting down Ghost..."
             kill -TERM $BOT_PID 2>/dev/null || true
             sleep 5
             kill -KILL $BOT_PID 2>/dev/null || true
